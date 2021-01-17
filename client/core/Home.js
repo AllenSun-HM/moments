@@ -8,8 +8,10 @@ import social from './../assets/images/social.jpg'
 import Grid from '@material-ui/core/Grid'
 import auth from './../auth/auth-helper'
 import FindPeople from './../user/FindPeople'
-import Newsfeed from './../post/Newsfeed'
+import {Newsfeed} from './../post/Newsfeed'
 import NewPost from '../post/NewPost'
+
+
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -43,6 +45,7 @@ const useStyles = makeStyles(theme => ({
 export default function Home({history}){
   const classes = useStyles()
   const [defaultPage, setDefaultPage] = useState(false)
+  const [posts, setPosts] = useState([])
 
   useEffect(()=> {
     setDefaultPage(auth.isAuthenticated())
@@ -54,6 +57,18 @@ export default function Home({history}){
     }
   }, [])
 
+  const addPost = (post, posts, setPosts) => {
+    const updatedPosts = [...posts]
+    updatedPosts.unshift(post)
+    setPosts(updatedPosts)
+  }
+
+  const removePost = (post, posts, setPosts) => {
+    const updatedPosts = [...posts]
+    const index = updatedPosts.indexOf(post)
+    updatedPosts.splice(index, 1)
+    setPosts(updatedPosts)
+  }
     return (
       <div className={classes.root}>
         { !defaultPage &&
@@ -76,10 +91,10 @@ export default function Home({history}){
         {defaultPage &&
         <Grid container spacing={2}>
             <Grid item xs={4} sm={4}>
-            <NewPost />
+            <NewPost addPost={addPost} posts={posts} setPosts={setPosts}/>
             </Grid>
             <Grid item xs={8} sm={8}>
-              <Newsfeed/>
+              <Newsfeed posts={posts} setPosts={setPosts} removePost={removePost}/>
             </Grid>
         </Grid>            
         }

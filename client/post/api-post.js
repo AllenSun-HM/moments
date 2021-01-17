@@ -1,13 +1,12 @@
 import axios from 'axios'
 const create = async (params, credentials, post) => {
   try {
-    let response = await axios.post('/api/posts/new/'+ params.userId, post, {
+    return axios.post('/api/posts/new/'+ params.userId, post, {
       headers: {
         'Accept': 'application/json',
         'Authorization': 'Bearer ' + credentials.t
       }, 
     })
-    return await response.json()
   } catch(err) {
     console.log(err)
   }

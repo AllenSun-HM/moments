@@ -5,8 +5,7 @@ const PostSchema = new mongoose.Schema({
     required: 'Text is required'
   },
   photo: {
-    data: Buffer,
-    contentType: String
+    type: String,
   },
   likes: [{type: mongoose.Schema.ObjectId, ref: 'User'}],
   comments: [{

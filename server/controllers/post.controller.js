@@ -1,34 +1,26 @@
 import Post from '../models/post.model'
 import errorHandler from './../helpers/dbErrorHandler'
-import formidable from 'formidable'
-import fs from 'fs'
-
-const create = (req, res, next) => {
-  let form = new formidable.IncomingForm()
-  form.keepExtensions = true
-  form.parse(req, async (err, fields, files) => {
-    if (err) {
-      return res.status(400).json({
-        error: "Image could not be uploaded"
-      })
-    }
-    let post = new Post(fields)
-    post.postedBy= req.profile
-    if(files.photo){
-      post.photo.data = fs.readFileSync(files.photo.path)
-      post.photo.contentType = files.photo.type
-    }
-    try {
-      let result = await post.save()
+import uploadToS3 from './s3.controller'
+const create = async (req, res, next) => {
+  
+    uploadToS3(req, res).then(url => {
       res.set('Cache-Control', 'public, max-age=30000')
-      res.json(result)
-    }catch (err){
+      let post = new Post({
+        text: req.body.text,
+        photo: url,
+        postedBy: req.profile
+      })
+      res.json(post)
+      console.log(req.profile)
+      post.save()
+    })
+    .catch(err => {
       return res.status(400).json({
         error: errorHandler.getErrorMessage(err)
       })
-    }
-  })
-}
+    })
+  }
+
 
 const postByID = async (req, res, next, id) => {
   try{
@@ -71,7 +63,7 @@ const listNewsFeed =  async  (req, res) => {
                           .populate('postedBy', '_id name')
                           .sort('-created')
                           .exec()
-    res.set('Cache-Control', 'public, max-age=99999999')
+    res.set('Cache-Control', 'public, max-age=10')
 
     res.json(posts)
   }catch(err){
@@ -95,9 +87,9 @@ const remove = async (req, res) => {
 
 const photo = (req, res, next) => {
     console.log(req)
-    res.set("Content-Type", req.post.photo.contentType)
+    res.set("Content-Type", req.post.image.contentType)
     res.set('Cache-Control', 'public, max-age=3000')
-    return res.send(req.post.photo.data)
+    return res.send(req.post.image.data)
 }
 
 const like = async (req, res) => {

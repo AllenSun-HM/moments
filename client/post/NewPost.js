@@ -63,49 +63,51 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-export default function NewPost (){
+export default function NewPost (props){
   const classes = useStyles()
   const [values, setValues] = useState({
     text: '',
-    photo: '',
+    image: '',
     error: '',
     user: {}
   })
   const jwt = auth.isAuthenticated()
-  const addPost = (post) => {
-    const updatedPosts = [...posts]
-    updatedPosts.unshift(post)
-    setPosts(updatedPosts)
-  }
+
   useEffect(() => {
     setValues({...values, user: auth.isAuthenticated().user})
   }, [])
-  const clickPost = () => {
+
+
+  const clickPost = async () => {
     let postData = new FormData()
     postData.append('text', values.text)
-    postData.append('photo', values.photo)
-    create({
+    postData.append('image', values.image)
+    await create({
       userId: jwt.user._id
     }, {
       t: jwt.token
-    }, postData).then((data) => {
+    }, postData).then(response => {
+      let data = response.data
       if (data.error) {
         setValues({...values, error: data.error})
       } else {
-        setValues({...values, text:'', photo: ''})
-        addPost(data)
+        setValues({...values, text:'', image: ''})
+        props.addPost(data, props.posts, props.setPosts)
       }
     })
+    console.log(values.image)
   }
 
 
   const handleChange = name => event => {
-    const value = name === 'photo'
+    const value = name === 'image'
       ? event.target.files[0]
       : event.target.value
     setValues({...values, [name]: value })
   }
-  const photoURL = values.user._id ?'/api/users/photo/'+ values.user._id : '/api/users/defaultphoto'
+  //values.user._id ?'https:/api/users/photo/'+ values.user._id :
+  const photoURL =  '/api/users/defaultphoto'
+  // const photoURL = 'https://s3.ap-northeast-2.amazonaws.com/mernsocial.img/Sat+Jan+16+2021+21%3A29%3A53+GMT%2B0800+(China+Standard+Time)'
     return (<div className={classes.root}>
       <Typography>
       <Card  className={classes.card}>
@@ -129,12 +131,12 @@ export default function NewPost (){
             className={classes.textField}
             margin="normal"
         />
-        <input accept="image/*" onChange={handleChange('photo')} className={classes.input} id="icon-button-file" type="file" />
+        <input accept="image/*" onChange={handleChange('image')} className={classes.input} id="icon-button-file" type="file" />
         <label htmlFor="icon-button-file">
           <IconButton color="secondary" className={classes.photoButton} component="span">
             <PhotoCamera />
           </IconButton>
-        </label> <span className={classes.filename}>{values.photo ? values.photo.name : ''}</span>
+        </label> <span className={classes.filename}>{values.image ? values.image.name : ''}</span>
         { values.error && (<Typography component="p" color="error">
             <Icon color="error" className={classes.error}>error</Icon>
               {values.error}

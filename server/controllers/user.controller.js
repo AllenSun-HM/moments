@@ -4,6 +4,7 @@ import errorHandler from './../helpers/dbErrorHandler'
 import formidable from 'formidable'
 import fs from 'fs'
 import profileImage from './../../client/assets/images/profile-pic.png'
+import uploadToS3 from './s3.controller'
 
 const create = async (req, res) => {
   const user = new User(req.body)
@@ -59,21 +60,12 @@ const list = async (req, res) => {
   }
 }
 
-const update = (req, res) => {
-  let form = new formidable.IncomingForm()
-  form.keepExtensions = true
-  form.parse(req, async (err, fields, files) => {
-    if (err) {
-      return res.status(400).json({
-        error: "Photo could not be uploaded"
-      })
-    }
+const update = async (req, res) => {
     let user = req.profile
-    user = extend(user, fields)
+    
     user.updated = Date.now()
-    if(files.photo){
-      user.photo.data = fs.readFileSync(files.photo.path)
-      user.photo.contentType = files.photo.type
+    if (req.body.image) {
+      uploadToS3(req, res).then(url => user.photo = url)
     }
     try {
       await user.save()
@@ -85,8 +77,8 @@ const update = (req, res) => {
         error: errorHandler.getErrorMessage(err)
       })
     }
-  })
-}
+  }
+
 
 const remove = async (req, res) => {
   try {

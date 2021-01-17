@@ -89,7 +89,7 @@ export default function EditProfile({ match }) {
     values.email && userData.append('email', values.email)
     values.passoword && userData.append('passoword', values.passoword)
     values.about && userData.append('about', values.about)
-    values.photo && userData.append('photo', values.photo)
+    values.photo && userData.append('image', values.photo)
     update({
       userId: match.params.userId
     }, {

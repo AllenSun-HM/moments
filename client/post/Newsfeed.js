@@ -22,9 +22,10 @@ const useStyles = makeStyles(theme => ({
     minHeight: 330
   }
 }))
-export default function Newsfeed () {
+
+
+const Newsfeed = ({posts, setPosts, removePost}) => {
   const classes = useStyles()
-  const [posts, setPosts] = useState([])
   const jwt = auth.isAuthenticated()
 
   useEffect(() => {
@@ -49,13 +50,6 @@ export default function Newsfeed () {
   }, [])
 
 
-  const removePost = (post) => {
-    const updatedPosts = [...posts]
-    const index = updatedPosts.indexOf(post)
-    updatedPosts.splice(index, 1)
-    setPosts(updatedPosts)
-  }
-
     return (
       <Card className={classes.card}>
         <Typography type="title" className={classes.title}>
@@ -67,3 +61,7 @@ export default function Newsfeed () {
     )
 }
 
+
+
+
+export {Newsfeed}

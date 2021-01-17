@@ -119,7 +119,8 @@ export default function Post (props){
             (<div className={classes.photo}>
               <img
                 className={classes.media}
-                src={'/api/posts/photo/'+props.post._id}
+                // src={'/api/posts/photo/'+props.post._id}
+                src= {props.post.photo.toString()}
                 />
             </div>)}
         </CardContent>
